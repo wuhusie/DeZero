@@ -5,3 +5,6 @@ __pycache__/
 *.pyw
 *.pyz
 *.pywz
+
+# 忽略.vscode文件夹
+.vscode/
