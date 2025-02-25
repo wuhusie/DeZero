@@ -1,3 +1,6 @@
+from step.step01 import Variable
+
+
 class Function:
     def __call__(self, input):
         '''
@@ -18,3 +21,12 @@ class Function:
         这是一种设计模式，叫做模板方法模式，即定义一个算法的骨架，而将一些步骤延迟到子类中实现，使得子类可以不改变一个算法的结构即可重定义该算法的某些特定步骤。
         '''
         raise NotImplementedError()
+    
+class Square(Function):
+    def forward(self, x):
+        return x ** 2
+    
+x = Variable(10)
+f = Square()
+y = f(x)
+print(y)
