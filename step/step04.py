@@ -1,4 +1,6 @@
+import numpy as np
 from typing import Callable, Any
+from step.step01 import Variable  # 使用相对导入
 
 def numerical_diff(f: Callable[[Variable], Variable], x: Variable, eps: float = 1e-4) -> float:
     """
@@ -15,13 +17,6 @@ def numerical_diff(f: Callable[[Variable], Variable], x: Variable, eps: float = 
     Returns:
         float: 函数 f 在点 x 处的数值微分（导数值）。结果是标量，表示 f(x) 在 x 处的变化率。
 
-    Examples:
-        >>> from dezero.variable import Variable
-        >>> def square(x): return x ** 2
-        >>> x = Variable(2.0)
-        >>> numerical_diff(square, x)
-        4.000000000000913  # 近似 2 * 2 = 4（f(x) = x^2 的导数）
-
     Notes:
         - 该函数使用中心差分公式：(f(x + eps) - f(x - eps)) / (2 * eps)，以提高精度。
         - 假设输入的 Variable.data 是标量。如果处理张量，可能需要扩展为逐元素计算。
@@ -35,5 +30,5 @@ def numerical_diff(f: Callable[[Variable], Variable], x: Variable, eps: float = 
     y0 = f(x0)
     y1 = f(x1)
     
-    # 使用中心差分公式计算数值微分
-    return (y1.data - y0.data) / (2 * eps)
+    # 将 memoryview 转换为 numpy array 进行计算
+    return float((np.array(y1.data) - np.array(y0.data)) / (2 * eps))

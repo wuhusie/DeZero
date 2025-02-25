@@ -1,3 +1,5 @@
+import numpy as np
+from step.step01 import Variable
 class Function:
     def __call__(self, input):
         '''
