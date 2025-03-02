@@ -50,6 +50,9 @@ class Square(Function):
         gx = 2 * x * gy
 
         return gx
+    
+def square(x):
+    return Square()(x)
 
 class Exp(Function):
     def forward(self, x):
@@ -62,23 +65,12 @@ class Exp(Function):
         
         return gx
 
-# 测试
-square = Square()
-exp = Exp()
+def exp(x):
+    return Exp()(x)
 
+# 测试
 x = Variable(np.array(0.5))
 y = square(exp(x))
 
 print(y.data)
 
-# 验证y的创造者是square，如果是，输出True，否则输出False
-print(y.creator == square) # True
-
-# 验证square的输入是exp
-print(square.input == exp.output) # True
-
-# 验证exp的输入是x
-print(exp.input == x) # True
-
-# 验证x的创造者是None
-print(x.creator is None) # True
