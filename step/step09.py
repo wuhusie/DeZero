@@ -1,12 +1,17 @@
 '''
-本文件用于实现反向传播的自动化
-即建立这样的一个机制：无论普通的计算流程（正向传播）中是什么样的计算，反向传播都能自动进行。
-这样的机制我们成为：动态计算图
+本文件改进了step07.py：
+1. 将反向传播计算由递归变为循环
+2. 抽象def square(x)和def exp(x)，使它们更通用
+3. 添加了y.grad = np.array(1.0)，使y的梯度为1
+4. 只支持ndarray类型，不支持标量类型
 '''
 import numpy as np
 
 class Variable:
     def __init__(self, data):
+        if data is not None:
+            if not isinstance(data, np.ndarray):
+                raise TypeError(f"{type(data)} is not supported")
         self.data = data
         self.grad = None
         self.creator = None
@@ -15,21 +20,32 @@ class Variable:
         self.creator = func
 
     def backward(self):
-        f = self.creator # 获取创建者
-        '''
-        如果创建者存在，则进行反向传播
-        如果创建者不存在，则说明已经到达了计算图的起点，Variable实例是由用户提供的变量创建的
-        '''
-        if f is not None: 
-            x = f.input # 获取输入
-            x.grad = f.backward(self.grad) # 调用backward方法，计算梯度
-            x.backward() # 递归调用backward方法，计算所有输入的梯度
+        if self.grad is None:  # 如果梯度为None，初始化为1
+            self.grad = np.ones_like(self.data)
+
+        funcs = [self.creator]
+        while funcs:
+            f = funcs.pop() # 获取最后一个元素
+            x, y = f.input, f.output # 获取输入和输出
+            x.grad = f.backward(y.grad) # 计算梯度
+
+            if x.creator is not None:
+                funcs.append(x.creator) # 将输入的创造者添加到列表中
+
+
+def as_array(x):
+    '''
+    将输入转换为ndarray类型
+    '''
+    if np.isscalar(x):
+        return np.array(x)
+    return x
 
 class Function:
     def __call__(self, input):
         x = input.data
         y = self.forward(x) # 正向传播
-        output = Variable(y) # 创建输出变量
+        output = Variable(as_array(y)) # 创建输出变量
         output.sef_creator(self) # 让输出变量保存创造者信息，即当前函数
         self.input = input # 保存输入变量
         self.output = output # 保存输出变量
@@ -69,8 +85,7 @@ def exp(x):
     return Exp()(x)
 
 # 测试
-x = Variable(np.array(0.5))
+x = Variable(np.array(1.0))
 y = square(exp(x))
-
-print(y.data)
-
+y.backward()
+print(x.grad)
