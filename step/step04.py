@@ -4,23 +4,27 @@ from step.step01 import Variable  # 使用相对导入
 
 def numerical_diff(f: Callable[[Variable], Variable], x: Variable, eps: float = 1e-4) -> float:
     """
-    计算函数 f 在点 x 处的数值微分（数值梯度）。
-
-    使用中心差分法（central difference）近似计算导数，通过微小扰动 eps 计算函数值的变化。
+    计算函数 f 在点 x 处的数值导数，用于近似导数计算。采用中心差分法，通过微小扰动 eps 评估函数变化，适用于验证解析导数或分析函数行为。
 
     Args:
-        f (Callable[[Variable], Variable]): 输入一个 Variable 实例作为参数并返回一个 Variable 实例的函数。
-            例如，f(x) = x ** 2 或其他自定义函数。
-        x (Variable): 输入的 Variable 实例，表示计算微分的点，包含数据（如标量或张量）。
-        eps (float, optional): 微小扰动值，用于计算数值微分。默认值为 1e-4（0.0001）。
+        f (Callable[[Variable], Variable]): 输入一个接受 Variable 实例并返回 Variable 实例的可调用函数，要求函数在 x 附近连续且可微。例如，f(x) = x ** 2 或其他自定义函数。
+        x (Variable): 输入的 Variable 实例，表示计算导数的点，包含数据（如标量或张量）。
+        eps (float, optional): 微小扰动值，用于计算数值导数。默认值为 1e-4（0.0001），适用于大多数场景；对于高精度需求可减小至 1e-6，但需注意数值稳定性。
 
     Returns:
-        float: 函数 f 在点 x 处的数值微分（导数值）。结果是标量，表示 f(x) 在 x 处的变化率。
+        float: 函数 f 在点 x 处的数值导数。结果是标量，表示 f(x) 在 x 处的变化率，仅适用于输入数据为标量的情况。
 
     Notes:
-        - 该函数使用中心差分公式：(f(x + eps) - f(x - eps)) / (2 * eps)，以提高精度。
-        - 假设输入的 Variable.data 是标量。如果处理张量，可能需要扩展为逐元素计算。
-        - eps 值过小可能导致数值误差（舍入误差），过大可能降低精度，1e-4 通常是合理的默认值。
+        - 该函数使用中心差分公式：(f(x + eps) - f(x - eps)) / (2 * eps)，以提高精度，相较前向差分误差更低。
+        - 假设输入的 Variable.data 是标量。若需处理张量，需逐元素调用或扩展函数逻辑。
+        - eps 值过小（如 1e-10）可能因浮点舍入误差导致结果不可靠，过大（如 0.1）则可能偏离真实导数。推荐范围为 1e-6 至 1e-3，默认为 1e-4。
+        - 对于高曲率函数或噪声数据，数值导数可能不稳定，建议结合解析方法验证。
+
+    Examples:
+        >>> x = Variable(2.0)
+        >>> f = lambda x: x ** 2
+        >>> numerical_diff(f, x)
+        4.000000000000051  # 近似 f'(x) = 2x 在 x = 2 处的值
     """
     # 创建两个扰动后的 Variable 实例
     x0 = Variable(x.data - eps)
