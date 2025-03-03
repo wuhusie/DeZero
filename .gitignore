@@ -8,3 +8,6 @@ __pycache__/
 
 # 忽略.vscode文件夹
 .vscode/
+
+# 忽略快速测试工作台
+step/quicktest.py
