@@ -84,8 +84,8 @@ class Exp(Function):
 def exp(x):
     return Exp()(x)
 
-# 测试
-x = Variable(np.array(1.0))
-y = square(exp(x))
-y.backward()
-print(x.grad)
+# # 测试
+# x = Variable(np.array(1.0))
+# y = square(exp(x))
+# y.backward()
+# print(x.grad)
